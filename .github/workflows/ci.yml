@@ -1,4 +1,4 @@
-name: ci 
+name: docs
 on:
   push:
     branches:
@@ -10,17 +10,11 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v3
+        with: 
+          fetch-depth: 0
       - uses: actions/setup-python@v4
         with:
-          python-version: 3.x
-      - run: echo "cache_id=$(date --utc '+%V')" >> $GITHUB_ENV 
-      - uses: actions/cache@v3
-        with:
-          key: mkdocs-material-${{ env.cache_id }}
-          path: .cache
-          restore-keys: |
-            mkdocs-material-
-      - run: pip install mkdocs-material 
+          python-version: 3.9
+      - run: pip install mkdocs mkdocs-material mkdocs-markdownextradata-plugin mkdocs-git-revision-date-localized-plugin "mkdocstrings[python]"
       - run: mkdocs gh-deploy --force
-
