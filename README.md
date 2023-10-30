@@ -1,3 +1,3 @@
-# Mjolnir
+# Mjölnir
 
 ![](docs/assets/thor.jpg)
