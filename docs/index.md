@@ -1,6 +1,6 @@
 # Introduction
 
-Mjolnir is a machine learning model enhanced by causal assumptions and uncertainty quantification.
+Mjölnir is a machine learning model enhanced by causal assumptions and uncertainty quantification.
 
 ![](assets/thor.jpg)
 
