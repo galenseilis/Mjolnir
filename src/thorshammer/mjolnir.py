@@ -13,10 +13,60 @@ import transforms
 # TODO: SymPy-based methods for mathematical analysis of model.
 # TODO: Compatible conformal prediction.
 class Mjolnir(transforms.DAGModel):
-    '''Mjolnir is a useful default model for interpretable causal ML.
+    """
+    Mjolnir is a useful default model for interpretable causal ML.
 
     "Let me tell you about my grandfather's hammer, which is rightfully mine." - Bodger
-    '''
+
+    Parameters
+    ----------
+    dag : networkx.DiGraph
+        The directed acyclic graph (DAG) representing the causal relationships.
+    dagm_params : dict, optional
+        Parameters to pass to the parent DAGModel, if any (default is None).
+    gp_params : dict, optional
+        Additional parameters for the SymbolicRegressor models (default is None).
+    sympy_converter : dict, optional
+        A dictionary that maps mathematical operation strings to SymPy functions (default is None).
+
+    Attributes
+    ----------
+    ordered_nodes : list
+        A list of nodes in topological order, indicating the order in which nodes should be processed.
+    sympy_converter : dict
+        A dictionary that maps mathematical operation strings to SymPy functions.
+
+    Methods
+    -------
+    fit(X)
+        Fit the Mjolnir model to the input data X.
+    _get_sympy_exprs()
+        Extract SymPy expressions from GPLearn instances.
+    derivative(method='analytic')
+        Compute the derivative of the model.
+    gradient()
+        Compute the gradient of the model.
+    divergence()
+        Compute the divergence of the model.
+    jacobian()
+        Compute the Jacobian matrix of the model.
+    hessian()
+        Compute the Hessian matrix of the model.
+    inv(X)
+        Compute the inverse using the Jacobian.
+    pinv(X)
+        Compute the Moore-Penrose pseudoinverse using the Jacobian.
+    fit_approx_inverse(X)
+        Fit a Mjolnir model on the reverse DAG to create an approximated inverse function.
+    conformal_fit(X)
+        Fit conformal models for each node in the DAG.
+    conformal_predict(X)
+        Make predictions using the fitted conformal models.
+
+    See Also
+    --------
+    transforms.DAGModel : Parent class for directed acyclic graph models.
+    """
 
     def __init__(self, dag, dagm_params=None, gp_params=None, sympy_converter=None):
 
@@ -54,11 +104,24 @@ class Mjolnir(transforms.DAGModel):
             self.sympy_converter = sympy_converter
 
     def fit(self, X):
+         """
+        Fit the Mjolnir model to the input data X.
+
+        Parameters
+        ----------
+        X : array-like, shape (n_samples, n_features)
+            The input data for training the model.
+        """
         super().fit(X)
         self._get_sympy_exprs()
 
     def _get_sympy_exprs(self):
         '''Extract SymPy expressions from GPLearn instances.
+
+        Notes
+        -----
+        This method extracts SymPy expressions from GPLearn instances and stores them in `symb_model_exprs`.
+
         https://stackoverflow.com/questions/48404263/how-to-export-the-output-of-gplearn-as-a-sympy-expression-or-some-other-readable
         '''
         self.symb_model_exprs = {}
@@ -72,6 +135,14 @@ class Mjolnir(transforms.DAGModel):
         # TODO: Handle MAPIE regression instances
 
     def derivative(self, method='analytic'):
+        """
+        Compute the derivative of the model.
+
+        Parameters
+        ----------
+        method : {'analytic', 'spectral'}, optional
+            The method to use for computing the derivative (default is 'analytic').
+        """
         raise NotImplementedError
 
         if method == 'analytic':
@@ -85,43 +156,94 @@ class Mjolnir(transforms.DAGModel):
 
 
     def gradient(self):
+        """
+        Compute the gradient of the model.
+        """
         raise NotImplementedError
 
     def divergence(self):
+        """
+        Compute the divergence of the model.
+        """
         raise NotImplementedError
 
     def jacobian(self):
+        """
+        Compute the Jacobian matrix of the model.
+        """
         raise NotImplementedError
 
     def hessian(self):
+        """
+        Compute the Hessian matrix of the model.
+        """
         raise NotImplementedError
 
     def inv(self, X):
-        '''Compute inverse using the Jacobian.
+        """
+        Compute the inverse using the Jacobian.
 
-        This function is not guaranteed to work. It depends
-        on the properties of the DAG and learned functions. In
-        some cases the Jacobian may not be defined. In other cases
-        the Jacobian may not be invertible.
-        '''
+        Parameters
+        ----------
+        X : array-like, shape (n_samples, n_features)
+            The input data for computing the inverse.
+
+        Notes
+        -----
+        This function is not guaranteed to work and depends on the properties of the DAG and learned functions.
+        """
         ...
 
     def pinv(self, X):
-        '''Compute Moore-Penrose pseudoinverse using the Jacobian.'''
+        """
+        Compute the Moore-Penrose pseudoinverse using the Jacobian.
+
+        Parameters
+        ----------
+        X : array-like, shape (n_samples, n_features)
+            The input data for computing the pseudoinverse.
+        """
         raise NotImplementedError
 
     def fit_approx_inverse(self, X):
-        '''Fit a Mjolnir model on the reverse DAG.
+        """
+        Fit a Mjolnir model on the reverse DAG to create an approximated inverse function.
 
-        Creates `self.approx_inverse` which acts as an
-        approximated inverse function.
-        '''
+        Parameters
+        ----------
+        X : array-like, shape (n_samples, n_features)
+            The input data for fitting the approximated inverse.
+
+        Notes
+        -----
+        Creates `self.approx_inverse`, which acts as an approximated inverse function.
+        """
         dag_inv = nx.DigGraph.reverse(self.dag)
         self.inv_mjolnir = Mjolnir(dag_inv, X)
         self.approx_inverse = self.inv_mjolnir.predict
 
     def conformal_fit(self, X):
+        """
+        Fit conformal models for each node in the DAG.
 
+        Parameters
+        ----------
+        X : array-like, shape (n_samples, n_features)
+            The input data for fitting conformal models.
+
+        Returns
+        -------
+        self : Mjolnir
+            The updated Mjolnir model with fitted conformal models.
+
+        Notes
+        -----
+        Overwrites symbolic expressions.
+
+        See Also
+        --------
+        MapieRegressor : The estimator used for fitting conformal models.
+        """
         self.conformal_models = {}
         fitted_conformal_predictions = {}
 
@@ -154,6 +276,29 @@ class Mjolnir(transforms.DAGModel):
         return self
 
     def conformal_predict(self, X):
+        """
+        Make predictions using the fitted conformal models.
+
+        Parameters
+        ----------
+        X : array-like, shape (n_samples, n_features)
+            The input data for making predictions.
+
+        Returns
+        -------
+        predictions : dict
+            Predictions for each node in the DAG.
+        conformal_predictions : dict
+            Conformal predictions for each node in the DAG.
+
+        Notes
+        -----
+        Nicely formats the output with pandas.
+
+        See Also
+        --------
+        MapieRegressor : The estimator used for fitting conformal models.
+        """
         conformal_predictions = {}
         predictions = {}
 
