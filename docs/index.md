@@ -13,6 +13,6 @@ import networkx as nx
 data = ...
 dag = nx.DiGraph(...)
 
-model = Mjolnir(dag, data)
+model = Mjolnir(dag)
 model.fit(data)
 ```
