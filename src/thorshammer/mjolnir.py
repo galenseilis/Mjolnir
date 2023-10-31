@@ -78,12 +78,17 @@ class Mjolnir(transforms.DAGModel):
             input_nodes = list(dag.predecessors(node))
 
             if input_nodes:
-                input_nodes = sorted(set(self.ordered_nodes) & set(input_nodes), key = self.ordered_nodes.index)
+                input_nodes = sorted(
+                    set(self.ordered_nodes) & set(input_nodes),
+                    key=self.ordered_nodes.index,
+                )
 
                 if gp_params is None:
                     models[node] = SymbolicRegressor(feature_names=input_nodes)
                 else:
-                    models[node] = SymbolicRegressor(feature_names=input_nodes, **gp_params)
+                    models[node] = SymbolicRegressor(
+                        feature_names=input_nodes, **gp_params
+                    )
 
         # Pass along any params to DAGModel
         if dagm_params is None:
@@ -93,18 +98,18 @@ class Mjolnir(transforms.DAGModel):
 
         if sympy_converter is None:
             self.sympy_converter = {
-                'sub': lambda x, y : x - y,
-                'div': lambda x, y : x/y,
-                'mul': lambda x, y : x*y,
-                'add': lambda x, y : x + y,
-                'neg': lambda x    : -x,
-                'pow': lambda x, y : x**y
-                }
+                "sub": lambda x, y: x - y,
+                "div": lambda x, y: x / y,
+                "mul": lambda x, y: x * y,
+                "add": lambda x, y: x + y,
+                "neg": lambda x: -x,
+                "pow": lambda x, y: x**y,
+            }
         else:
             self.sympy_converter = sympy_converter
 
     def fit(self, X):
-         """
+        """
         Fit the Mjolnir model to the input data X.
 
         Parameters
@@ -116,25 +121,24 @@ class Mjolnir(transforms.DAGModel):
         self._get_sympy_exprs()
 
     def _get_sympy_exprs(self):
-        '''Extract SymPy expressions from GPLearn instances.
+        """Extract SymPy expressions from GPLearn instances.
 
         Notes
         -----
         This method extracts SymPy expressions from GPLearn instances and stores them in `symb_model_exprs`.
 
         https://stackoverflow.com/questions/48404263/how-to-export-the-output-of-gplearn-as-a-sympy-expression-or-some-other-readable
-        '''
+        """
         self.symb_model_exprs = {}
         for node in self.ordered_nodes:
             if list(self.dag.predecessors(node)):
                 self.symb_model_exprs[node] = sympy.sympify(
-                    str(self.models[node]),
-                    locals=self.sympy_converter
-                    )
+                    str(self.models[node]), locals=self.sympy_converter
+                )
 
         # TODO: Handle MAPIE regression instances
 
-    def derivative(self, method='analytic'):
+    def derivative(self, method="analytic"):
         """
         Compute the derivative of the model.
 
@@ -145,15 +149,16 @@ class Mjolnir(transforms.DAGModel):
         """
         raise NotImplementedError
 
-        if method == 'analytic':
+        if method == "analytic":
             ...
-        elif method == 'spectral':
+        elif method == "spectral":
             # https://www.youtube.com/watch?v=reievpVoSsY
             # https://www.youtube.com/watch?v=SBYQ3bprKy0
             ...
         else:
-            raise NotImplementedError(f'Method {method} is not supported. Only available methods are "analytic" and "spectral."')
-
+            raise NotImplementedError(
+                f'Method {method} is not supported. Only available methods are "analytic" and "spectral."'
+            )
 
     def gradient(self):
         """
@@ -251,26 +256,29 @@ class Mjolnir(transforms.DAGModel):
             input_nodes = list(self.dag.predecessors(node))
 
             if self.verbose and input_nodes:
-                
-                print(f'Conformal fitting {node} as a function of {input_nodes}.')
+
+                print(f"Conformal fitting {node} as a function of {input_nodes}.")
 
             if input_nodes:
                 self.conformal_models[node] = MapieRegressor(
-                    estimator=self.models[node], method='plus', cv=5
-                    )
+                    estimator=self.models[node], method="plus", cv=5
+                )
 
                 input_data = np.column_stack(
                     [
-                        fitted_conformal_predictions[in_node] if in_node in fitted_conformal_predictions
+                        fitted_conformal_predictions[in_node]
+                        if in_node in fitted_conformal_predictions
                         else X[in_node]
                         for in_node in input_nodes
-                        ]
-                        )
+                    ]
+                )
                 # Fit model
                 self.conformal_models[node].fit(input_data, X[node])
 
                 # Store predictions
-                fitted_conformal_predictions[node], _  = self.conformal_models[node].predict(input_data, alpha=[0.05, 0.95])
+                fitted_conformal_predictions[node], _ = self.conformal_models[
+                    node
+                ].predict(input_data, alpha=[0.05, 0.95])
 
         # TODO: Overwrite symbolic expressions
         return self
@@ -309,22 +317,24 @@ class Mjolnir(transforms.DAGModel):
 
                 input_data = np.column_stack(
                     [
-                        predictions[in_node] if in_node in predictions
-                        else X[in_node]
+                        predictions[in_node] if in_node in predictions else X[in_node]
                         for in_node in input_nodes
-                        ]
-                        )
+                    ]
+                )
 
-                predictions[node], conformal_predictions[node]  = self.conformal_models[node].predict(input_data, alpha=[0.05, 0.95])
+                predictions[node], conformal_predictions[node] = self.conformal_models[
+                    node
+                ].predict(input_data, alpha=[0.05, 0.95])
 
-        return predictions, conformal_predictions # TODO: Nicely format output with pandas
+        return (
+            predictions,
+            conformal_predictions,
+        )  # TODO: Nicely format output with pandas
 
-import examples
-dag, data = examples.make_dag_regression(n=10)
-model = Mjolnir(
-    dag,
-    dagm_params={'verbose':1},
-    gp_params={'generations':2}
-    )
+
+import datasets
+
+dag, data = datasets.make_dag_regression(n=10)
+model = Mjolnir(dag, dagm_params={"verbose": 1}, gp_params={"generations": 2})
 model.conformal_fit(data)
 ##model._get_sympy_exprs()

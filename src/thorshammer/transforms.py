@@ -14,9 +14,8 @@ import warnings
 # TODO: Latent variables
 # TODO: Add preformations and  postformations as transformations before/after prediction respectively.
 class DAGModel(BaseEstimator, TransformerMixin):
-    '''Directed acylic graph of predictive models.
-    '''
-    
+    """Directed acylic graph of predictive models."""
+
     def __init__(self, dag, models, transforms=None, verbose=False):
         """
         Initialize a DAGModel.
@@ -26,7 +25,7 @@ class DAGModel(BaseEstimator, TransformerMixin):
             dag (networkx.DiGraph): A directed acyclic graph specifying variable relationships.
             models (dict): A dictionary of Scikit-Learn models to be used for each variable.
             transforms (dict): Transformations to variables.
-            
+
         Example models dictionary:
         models = {
             'X0': LinearRegression(),
@@ -36,18 +35,18 @@ class DAGModel(BaseEstimator, TransformerMixin):
         """
 
         self.verbose = verbose
-        
+
         if not nx.is_directed_acyclic_graph(dag):
-            raise ValueError('DiGraph must be acyclic.')
-        
+            raise ValueError("DiGraph must be acyclic.")
+
         self.dag = dag
         self.models = models
 
         for node in self.dag:
             if not list(self.dag.predecessors(node)) and node in self.models:
-                warn_str = f'Variable {node} was assigned a model but does not have any predecessors.'
+                warn_str = f"Variable {node} was assigned a model but does not have any predecessors."
                 warnings.warn(warn_str)
-        
+
         self.ordered_nodes = list(nx.topological_sort(self.dag))
         self.fitted_predictions = {}
 
@@ -68,22 +67,25 @@ class DAGModel(BaseEstimator, TransformerMixin):
             input_nodes = list(self.dag.predecessors(node))
 
             if self.verbose and input_nodes:
-                print(f'Fitting {node} as a function of {input_nodes}.')
+                print(f"Fitting {node} as a function of {input_nodes}.")
 
             if input_nodes:
-                input_nodes = sorted(set(self.ordered_nodes) & set(input_nodes), key = self.ordered_nodes.index)
+                input_nodes = sorted(
+                    set(self.ordered_nodes) & set(input_nodes),
+                    key=self.ordered_nodes.index,
+                )
                 # Collect predictors from input data and earlier predictions in DAG.
                 input_data = np.column_stack(
                     [
-                        self.fitted_predictions[in_node] if in_node in self.fitted_predictions
+                        self.fitted_predictions[in_node]
+                        if in_node in self.fitted_predictions
                         else X[in_node]
                         for in_node in input_nodes
-                        ]
-                        )
+                    ]
+                )
 
                 # Fit model
                 self.models[node].fit(input_data, X[node])
-                
 
                 # Store predictions
                 self.fitted_predictions[node] = self.models[node].predict(input_data)
@@ -107,14 +109,18 @@ class DAGModel(BaseEstimator, TransformerMixin):
             if node in self.models:
                 input_nodes = list(self.dag.predecessors(node))
                 if input_nodes:
-                    input_nodes = sorted(set(self.ordered_nodes) & set(input_nodes), key = self.ordered_nodes.index)
+                    input_nodes = sorted(
+                        set(self.ordered_nodes) & set(input_nodes),
+                        key=self.ordered_nodes.index,
+                    )
                     input_data = np.column_stack(
-                    [
-                        transformed_data[in_node] if in_node in transformed_data
-                        else X[in_node]
-                        for in_node in input_nodes
+                        [
+                            transformed_data[in_node]
+                            if in_node in transformed_data
+                            else X[in_node]
+                            for in_node in input_nodes
                         ]
-                        )
+                    )
                     transformed_data[node] = self.models[node].predict(input_data)
 
         return transformed_data
@@ -123,7 +129,7 @@ class DAGModel(BaseEstimator, TransformerMixin):
         return self.transform(X)
 
     def do(self, query):
-        '''Compute a do-calculus query.
+        """Compute a do-calculus query.
 
         PARAMETERS
         ----------
@@ -134,14 +140,14 @@ class DAGModel(BaseEstimator, TransformerMixin):
         -------
         DAGModel:
             Modified model for query.
-        '''
-        raise NotImplementedError('Do-calculus not implemented yet.')
+        """
+        raise NotImplementedError("Do-calculus not implemented yet.")
 
     def export_graphviz(self):
-        '''Export to graphviz.'''
+        """Export to graphviz."""
         dot = graphviz.Digraph()
         for node in self.ordered_nodes:
-            dot.node(node, shape='rectangle')
+            dot.node(node, shape="rectangle")
 
         for edge in self.dag.edges():
             dot.edge(*edge)
@@ -150,15 +156,15 @@ class DAGModel(BaseEstimator, TransformerMixin):
 
 
 class AdditiveSciPyDistError(BaseEstimator, TransformerMixin):
-    '''Additive observation error using SciPy distribution.'''
+    """Additive observation error using SciPy distribution."""
 
     def __init__(self, dist):
-        '''
+        """
         PARAMETERS
         ----------
         dist: scipy.stats.rv_<any>
-            SciPy distribution.          
-        '''
+            SciPy distribution.
+        """
         self.dist = dist
 
     def fit(self, X, y):
@@ -168,17 +174,18 @@ class AdditiveSciPyDistError(BaseEstimator, TransformerMixin):
 
         # Fit distribuion on errors
         self.dist.fit(residuals)
-        
+
         return self
 
     def transform(self, X):
         return X + self.dist.rvs(size=X.size)
-        
+
+
 class MultiplicativeSciPyDistError(BaseEstimator, TransformerMixin):
-    '''Multiplicative observation error using SciPy distribution.'''
+    """Multiplicative observation error using SciPy distribution."""
 
     def __init__(self, dist):
-        '''
+        """
         PARAMETERS
         ----------
         dist: scipy.stats.rv_<any>
@@ -188,7 +195,7 @@ class MultiplicativeSciPyDistError(BaseEstimator, TransformerMixin):
         -------
         self: object
             Self
-        '''
+        """
         self.dist = dist
 
     def fit(self, X, y):
@@ -198,24 +205,25 @@ class MultiplicativeSciPyDistError(BaseEstimator, TransformerMixin):
 
         # Fit distribuion on quotients
         self.dist.fit(quotient)
-        
+
         return self
 
     def transform(self, X):
         return X * self.dist.rvs(size=X.size)
 
+
 class StatsmodelsAPI(BaseEstimator):
-    '''Wrapper around Statsmodels API.'''
+    """Wrapper around Statsmodels API."""
 
     def __init__(self, sm_model, sm_params=None):
-        '''
+        """
         PARAMETERS
         ----------
         sm_model:
             statsmodels model class.
         sm_params:
             Parameters for SM model.
-        '''
+        """
         self.sm_model = sm_model
         self.sm_params = sm_params
 
