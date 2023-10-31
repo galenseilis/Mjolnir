@@ -39,6 +39,7 @@ extra:
 nav:
   - Overview: index.md
   - Methodology: methodology.md
+  - Examples: examples.md
 
 plugins:
   - search
