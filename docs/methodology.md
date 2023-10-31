@@ -1,9 +1,9 @@
 
 # Causal Assumptions
 
-Machine learning algorithms are like a black box. Things go in, things go out, but it is not usually possible to understand what is happening within the box. A neural network is an example of a machine learning model. It can use something similar to fuzzy logic to weight different paths of causality in a computation graph, but the topology of the computation graph does not have to match the causal assumptions in the causal model.
+Machine learning algorithms are like a black box. Data goes in, predictions come out, but it is not usually possible to understand what is happening within the box. A neural network is an example of a machine learning model. It can use something similar to fuzzy logic to weight different paths of causality in a computation graph, but the topology of the computation graph does not have to match the causal assumptions in the causal model.
 
-Mjölnir is designed with the assignment of causal assumptions in mind. A causal directed acyclic graph is provided by the use which is used to constrain the space of models that can be learned from the data.
+Mjölnir is designed with the assignment of causal assumptions in mind. A causal directed acyclic graph is provided by the use which is used to constrain the space of models that can be learned from the data. It allows the user to specify causal assumptions which inform what models are allowed to be learned. This constraint makes the mathematics of the model more interpretable by mimicing the causal structure of the causal DAG in the structure of the symbolic expressions learned in the training and model discovery process.
 
 # Symbolic Regression
 
