@@ -12,7 +12,7 @@ If you are unfamiliar with the notion of causal assumptions, I recommed this rel
 
 # Symbolic Regression
 
-Symbolic regression involves estimating a symbolic expression that approximates the data well. Mjölnir uses genetic programming to balance accuracy and simplicity of the models estimated. Thus Mjölnir provides a means of model discovery.
+[Symbolic regression](https://en.wikipedia.org/wiki/Symbolic_regression) involves estimating a symbolic expression that approximates the data well. Mjölnir uses [genetic programming](https://en.wikipedia.org/wiki/Genetic_programming) to balance accuracy and simplicity of the models estimated. Thus Mjölnir provides a means of model discovery which is constrained by causal assumptions.
 
 # Confomal Prediction
 
@@ -27,3 +27,7 @@ Conformal prediction is a form of uncertainty quantification that assumes relati
 # Computer Algebra System
 
 The symbolic expressions estimated in through symbolic regression become automatically available for mathematical analysis with SymPy. Mjölnir also comes with some methods for common mathematical queries such as locating optima and inferring asymptotic behaviour.
+
+# Do Calculus
+
+Coming soon.

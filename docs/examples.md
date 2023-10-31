@@ -38,3 +38,7 @@ print(model._get_sympy_exprs())
 ```
 
 If you would like to further analyze the model but you're unfamiliar with SymPy or computer algebra, I recommend looking at the [Introductory Tutorial](https://docs.sympy.org/latest/tutorials/intro-tutorial/index.html) for SymPy to get you started.
+
+# Do Calculus
+
+Coming soon.
