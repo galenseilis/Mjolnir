@@ -5,6 +5,11 @@ Machine learning algorithms are like a black box. Data goes in, predictions come
 
 Mjölnir is designed with the assignment of causal assumptions in mind. A causal directed acyclic graph is provided by the use which is used to constrain the space of models that can be learned from the data. It allows the user to specify causal assumptions which inform what models are allowed to be learned. This constraint makes the mathematics of the model more interpretable by mimicing the causal structure of the causal DAG in the structure of the symbolic expressions learned in the training and model discovery process.
 
+If you are unfamiliar with the notion of causal assumptions, I recommed this related video by Richard McElreath on *causal inference*.
+
+<iframe width="560" height="315" src="https://www.youtube.com/embed/KNPYUVmY3NM?si=K8-BAOA-Sb6SeKu8" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+
+
 # Symbolic Regression
 
 Symbolic regression involves estimating a symbolic expression that approximates the data well. Mjölnir uses genetic programming to balance accuracy and simplicity of the models estimated. Thus Mjölnir provides a means of model discovery.

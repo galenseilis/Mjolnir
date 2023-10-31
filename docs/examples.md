@@ -12,10 +12,6 @@ dag.add_edge('X1', 'X2')
 dag.add_edge('X3', 'X2') 
 ```
 
-If you are unfamiliar with the notion of causal assumptions, I recommed this related video by Richard McElreath on *causal inference*.
-
-<iframe width="560" height="315" src="https://www.youtube.com/embed/KNPYUVmY3NM?si=K8-BAOA-Sb6SeKu8" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
-
 # Training a Model
 
 If you're familiar with the Scikit-Learn API, this should be familiar. Simply import the class `Mjolnir`. For the sake of example I am going to ignore the DAG we defined earlier, and generate one randomly from scratch.
