@@ -330,7 +330,8 @@ class Mjolnir(transforms.DAGModel):
             predictions,
             conformal_predictions,
         )  # TODO: Nicely format output with pandas
-
+        
+        return self
 
 import datasets
 
