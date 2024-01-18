@@ -1,3 +1,3 @@
-from .datasets import datasets
-from .transforms import transforms
-from .mjolnir import Mjolnir
+from . import datasets
+from . import transforms
+from . import mjolnir

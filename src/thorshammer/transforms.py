@@ -1,4 +1,4 @@
-from typing import Any, Dict, NoReturn, Self
+from typing import Any, Dict, NoReturn
 
 import graphviz
 import numpy as np
@@ -60,7 +60,7 @@ class DAGModel(BaseEstimator, TransformerMixin):
         self.ordered_nodes = list(nx.topological_sort(self.dag))
         self.fitted_predictions = {}
 
-    def fit(self, X: NDArray, y: NDArray = None) -> Self:
+    def fit(self, X: NDArray, y: NDArray = None):
         """
         Fit the DAGModel to the data.
 
@@ -207,7 +207,7 @@ class MultiplicativeSciPyDistError(BaseEstimator, TransformerMixin):
         """
         self.dist = dist
 
-    def fit(self, X: NDArray, y: NDArray) -> Self:
+    def fit(self, X: NDArray, y: NDArray):
         # Compute quotient
         quotient = y / X
 
@@ -235,7 +235,7 @@ class StatsmodelsAPI(BaseEstimator):
         self.sm_model = sm_model
         self.sm_params = sm_params
 
-    def fit(self, X: NDArray, y: NDArray) -> Self:
+    def fit(self, X: NDArray, y: NDArray):
         if sm_params is None:
             self._model = sm_model(y, X)
         else:
