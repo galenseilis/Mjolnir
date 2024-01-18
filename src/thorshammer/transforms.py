@@ -1,5 +1,8 @@
+from typing import Any, Dict, NoReturn, Self
+
 import graphviz
 import numpy as np
+from numpy.typing import NDArray
 from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.naive_bayes import MultinomialNB
 from sklearn.utils.validation import check_is_fitted
@@ -9,6 +12,7 @@ import warnings
 
 # TODO: Implement Markov misclassification class for classifiers.
 
+
 # TODO: Decide if I want to add measurement error terms.
 # TODO: Decide if/how to deal with missing data.
 # TODO: Latent variables
@@ -16,7 +20,13 @@ import warnings
 class DAGModel(BaseEstimator, TransformerMixin):
     """Directed acylic graph of predictive models."""
 
-    def __init__(self, dag, models, transforms=None, verbose=False):
+    def __init__(
+        self,
+        dag: nx.DiGraph,
+        models: dict,
+        transforms: dict = None,
+        verbose: bool = False,
+    ) -> NoReturn:
         """
         Initialize a DAGModel.
 
@@ -50,7 +60,7 @@ class DAGModel(BaseEstimator, TransformerMixin):
         self.ordered_nodes = list(nx.topological_sort(self.dag))
         self.fitted_predictions = {}
 
-    def fit(self, X, y=None):
+    def fit(self, X: NDArray, y: NDArray = None) -> Self:
         """
         Fit the DAGModel to the data.
 
@@ -92,7 +102,7 @@ class DAGModel(BaseEstimator, TransformerMixin):
 
         return self
 
-    def transform(self, X):
+    def transform(self, X: NDArray) -> NoReturn:
         """
         Transform the data using the fitted models.
 
@@ -125,7 +135,7 @@ class DAGModel(BaseEstimator, TransformerMixin):
 
         return transformed_data
 
-    def predict(self, X):
+    def predict(self, X: NDArray) -> dict:
         return self.transform(X)
 
     def do(self, query):
@@ -143,7 +153,7 @@ class DAGModel(BaseEstimator, TransformerMixin):
         """
         raise NotImplementedError("Do-calculus not implemented yet.")
 
-    def export_graphviz(self):
+    def export_graphviz(self) -> str:
         """Export to graphviz."""
         dot = graphviz.Digraph()
         for node in self.ordered_nodes:
@@ -168,7 +178,6 @@ class AdditiveSciPyDistError(BaseEstimator, TransformerMixin):
         self.dist = dist
 
     def fit(self, X, y):
-
         # Compute residuals
         residuals = y - X
 
@@ -198,8 +207,7 @@ class MultiplicativeSciPyDistError(BaseEstimator, TransformerMixin):
         """
         self.dist = dist
 
-    def fit(self, X, y):
-
+    def fit(self, X: NDArray, y: NDArray) -> Self:
         # Compute quotient
         quotient = y / X
 
@@ -208,14 +216,14 @@ class MultiplicativeSciPyDistError(BaseEstimator, TransformerMixin):
 
         return self
 
-    def transform(self, X):
+    def transform(self, X: NDArray):
         return X * self.dist.rvs(size=X.size)
 
 
 class StatsmodelsAPI(BaseEstimator):
     """Wrapper around Statsmodels API."""
 
-    def __init__(self, sm_model, sm_params=None):
+    def __init__(self, sm_model, sm_params=None) -> NoReturn:
         """
         PARAMETERS
         ----------
@@ -227,7 +235,7 @@ class StatsmodelsAPI(BaseEstimator):
         self.sm_model = sm_model
         self.sm_params = sm_params
 
-    def fit(self, X, y):
+    def fit(self, X: NDArray, y: NDArray) -> Self:
         if sm_params is None:
             self._model = sm_model(y, X)
         else:
@@ -235,5 +243,7 @@ class StatsmodelsAPI(BaseEstimator):
 
         self.model_results = self._model.fit()
 
-    def predict(self, X):
+        return self
+
+    def predict(self, X: NDArray) -> Any:
         return self.model_results.predict(X)

@@ -8,6 +8,7 @@ import sympy
 
 import transforms
 
+
 # TODO: Default multiple imputation of input data for missing data. Follow DAG structure
 # TODO: Parameter to use Optuna to hyperparameter tune.
 # TODO: SymPy-based methods for mathematical analysis of model.
@@ -69,7 +70,6 @@ class Mjolnir(transforms.DAGModel):
     """
 
     def __init__(self, dag, dagm_params=None, gp_params=None, sympy_converter=None):
-
         self.ordered_nodes = list(nx.topological_sort(dag))
 
         # Prepare models with or without additional parameters.
@@ -256,7 +256,6 @@ class Mjolnir(transforms.DAGModel):
             input_nodes = list(self.dag.predecessors(node))
 
             if self.verbose and input_nodes:
-
                 print(f"Conformal fitting {node} as a function of {input_nodes}.")
 
             if input_nodes:
@@ -314,7 +313,6 @@ class Mjolnir(transforms.DAGModel):
             input_nodes = list(self.dag.predecessors(node))
 
             if input_nodes:
-
                 input_data = np.column_stack(
                     [
                         predictions[in_node] if in_node in predictions else X[in_node]
@@ -330,8 +328,9 @@ class Mjolnir(transforms.DAGModel):
             predictions,
             conformal_predictions,
         )  # TODO: Nicely format output with pandas
-        
+
         return self
+
 
 import datasets
 

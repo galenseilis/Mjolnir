@@ -1,12 +1,13 @@
 from itertools import product
 import random
+from typing import NoReturn
 
 import networkx as nx
 import numpy as np
 import pandas as pd
 
 
-def decycle(d):
+def decycle(d: nx.DiGraph) -> NoReturn:
     """
     Pseudorandomly remove cycles from a directed graph.
 
@@ -29,7 +30,7 @@ def decycle(d):
         d.remove_edge(*target_edge)
 
 
-def random_dag(n=100, m=1000, node_prefix="X"):
+def random_dag(n: int = 100, m: int = 1000, node_prefix: str = "X") -> nx.DiGraph:
     possible_edges = [
         (f"{node_prefix}{pair[0]}", f"{node_prefix}{pair[1]}")
         for pair in product(range(n), repeat=2)
