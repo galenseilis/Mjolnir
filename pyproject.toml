@@ -8,7 +8,7 @@ packages = ["src/thorshammer"]
 
 [project]
 name = "Thor-Hammer"
-version = "0.0.6"
+version = "0.0.7"
 authors = [
   { name="Galen Seilis", email="galen.seilis@seilis.ca" },
 ]
