@@ -22,6 +22,7 @@ classifiers = [
 ]
 dependencies = [
 	"gplearn",
+	"graphviz",
 	"mapie",
 	"networkx",
 	"numpy",

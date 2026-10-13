@@ -6,7 +6,7 @@ import pandas as pd
 from sklearn.base import BaseEstimator
 import sympy
 
-import transforms
+from . import transforms
 
 
 # TODO: Default multiple imputation of input data for missing data. Follow DAG structure
@@ -223,8 +223,9 @@ class Mjolnir(transforms.DAGModel):
         -----
         Creates `self.approx_inverse`, which acts as an approximated inverse function.
         """
-        dag_inv = nx.DigGraph.reverse(self.dag)
-        self.inv_mjolnir = Mjolnir(dag_inv, X)
+        dag_inv = nx.DiGraph.reverse(self.dag)
+        self.inv_mjolnir = Mjolnir(dag_inv)
+        self.inv_mjolnir.fit(X)
         self.approx_inverse = self.inv_mjolnir.predict
 
     def conformal_fit(self, X):
@@ -329,12 +330,3 @@ class Mjolnir(transforms.DAGModel):
             conformal_predictions,
         )  # TODO: Nicely format output with pandas
 
-        return self
-
-
-import datasets
-
-dag, data = datasets.make_dag_regression(n=10)
-model = Mjolnir(dag, dagm_params={"verbose": 1}, gp_params={"generations": 2})
-model.conformal_fit(data)
-##model._get_sympy_exprs()

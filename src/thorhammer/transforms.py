@@ -236,10 +236,10 @@ class StatsmodelsAPI(BaseEstimator):
         self.sm_params = sm_params
 
     def fit(self, X: NDArray, y: NDArray):
-        if sm_params is None:
-            self._model = sm_model(y, X)
+        if self.sm_params is None:
+            self._model = self.sm_model(y, X)
         else:
-            self._model = sm_model(y, X, **self.sm_params)
+            self._model = self.sm_model(y, X, **self.sm_params)
 
         self.model_results = self._model.fit()
 

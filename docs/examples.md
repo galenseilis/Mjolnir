@@ -17,8 +17,8 @@ dag.add_edge('X3', 'X2')
 If you're familiar with the Scikit-Learn API, this should be familiar. Simply import the class `Mjolnir`. For the sake of example I am going to ignore the DAG we defined earlier, and generate one randomly from scratch.
 
 ```python
-from mjolnir import datasets
-from mjolnir import Mjolnir
+from thorhammer import datasets
+from thorhammer import Mjolnir
 
 dag, data = datasets.make_dag_regression(n=10)
 

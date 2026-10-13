@@ -7,7 +7,7 @@ Mjölnir is a machine learning model enhanced by causal assumptions and uncertai
 # Quick Start
 
 ```python
-from mjolnir import Mjolnir
+from thorhammer import Mjolnir
 import networkx as nx
 
 data = ...
