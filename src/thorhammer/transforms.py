@@ -71,6 +71,7 @@ class DAGModel(BaseEstimator, TransformerMixin):
         Returns:
             self
         """
+        self.fitted_predictions = {}
         # Iterate through the nodes in topological order and fit the models
         for node in self.ordered_nodes:
             # Get the input nodes for this variable

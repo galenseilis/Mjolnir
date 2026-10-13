@@ -31,22 +31,31 @@ def decycle(d: nx.DiGraph) -> NoReturn:
 
 
 def random_dag(n: int = 100, m: int = 1000, node_prefix: str = "X") -> nx.DiGraph:
-    possible_edges = [
-        (f"{node_prefix}{pair[0]}", f"{node_prefix}{pair[1]}")
-        for pair in product(range(n), repeat=2)
-    ]
+    """Generate a random DAG with ``n`` nodes and up to ``m`` edges.
+
+    Self-loops are excluded and cycles are removed, so the returned graph is
+    guaranteed to be a directed acyclic graph.
+    """
+    nodes = [f"{node_prefix}{i}" for i in range(n)]
+    possible_edges = [(u, v) for u, v in product(nodes, repeat=2) if u != v]
     d = nx.DiGraph()
-    edges = random.sample(possible_edges, n)
-    d.add_edges_from(edges)
+    d.add_edges_from(random.sample(possible_edges, min(m, len(possible_edges))))
     decycle(d)
     return d
 
 
 def make_dag_regression(n=100, m=1000, node_prefix="X"):
-    d = random_dag(n, m, node_prefix)
+    """Generate a DAG and ``m`` samples from a linear structural causal model.
+
+    Each edge ``(u, v)`` contributes ``beta * u`` to ``v``, so descendants are
+    noisy linear functions of their ancestors. Models fit to this data should
+    recover the parent relationships encoded in the DAG.
+    """
+    d = random_dag(n, n, node_prefix)
     data = np.random.normal(size=m * n).reshape(m, n)
+    index = {f"{node_prefix}{i}": i for i in range(n)}
     betas = {edge: np.random.normal(scale=10) for edge in d.edges()}
-    for node in nx.topological_sort(d):
-        for edge in d.out_edges(node):
-            data[:, int(node[1:])] += betas[edge] * data[:, int(edge[1][1:])]
+    for parent in nx.topological_sort(d):
+        for _, child in d.out_edges(parent):
+            data[:, index[child]] += betas[(parent, child)] * data[:, index[parent]]
     return d, pd.DataFrame(data, columns=[f"{node_prefix}{i}" for i in range(n)])
